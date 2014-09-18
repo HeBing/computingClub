@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Debugging in R</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Debugging in R">
+  <meta name="author" content="presented by Bing He">
+  <meta name="generator" content="slidify" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/default.css" media="all" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/phone.css" 
+    media="only screen and (max-device-width: 480px)" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/slidify.css" >
+  <link rel="stylesheet" href="libraries/highlighters/highlight.js/css/tomorrow.css" />
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->  <link rel=stylesheet href="./assets/css/ribbons.css"></link>
+
+  
+  <!-- Grab CDN jQuery, fall back to local if offline -->
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+  <script>window.jQuery || document.write('<script src="libraries/widgets/quiz/js/jquery.js"><\/script>')</script> 
+  <script data-main="libraries/frameworks/io2012/js/slides" 
+    src="libraries/frameworks/io2012/js/require-1.0.8.min.js">
+  </script>
+  
+  
+
+</head>
+<body style="opacity: 0">
+  <slides class="layout-widescreen">
+    
+    <!-- LOGO SLIDE -->
+        <slide class="title-slide segue nobackground">
+  <aside class="gdbar">
+    <img src="assets/img/bloomberg_shield.png">
+  </aside>
+  <hgroup class="auto-fadein">
+    <h1>Debugging in R</h1>
+    <h2>A Short Introduction to debugging and condition handling in R</h2>
+    <p>presented by Bing He<br/>Journal Club, 2014-09-18</p>
+  </hgroup>
+  <article></article>  
+</slide>
+    
+
+    <!-- SLIDES -->
+    <slide class="" id="slide-1" style="background:;">
+  <hgroup>
+    <h2>Let&#39;s debug!</h2>
+  </hgroup>
+  <article data-timings="">
+    <p><img src="./fig/debug2.png" alt="width"></p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="segue dark" id="slide-2" style="background:;">
+  <hgroup>
+    <h2>What is the most handy tool for debugging in nearly all programming languages?</h2>
+  </hgroup>
+  <article data-timings="">
+    
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="segue" id="slide-3" style="background:;">
+  <hgroup>
+    <h2><code>print()</code></h2>
+  </hgroup>
+  <article data-timings="">
+    
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-4" style="background:;">
+  <hgroup>
+    <h2>Content</h2>
+  </hgroup>
+  <article data-timings="">
+    <ul>
+<li><strong>Interactive debugging tools</strong>: </li>
+</ul>
+
+<pre><code class="r">traceback(); browser()
+recover()
+dump.frames(); debugger()
+</code></pre>
+
+<ul>
+<li><strong>Handling expected errors automatically (Condition Handling)</strong>:</li>
+</ul>
+
+<pre><code class="r">stop(); warning(); message()
+try(); tryCatch()
+</code></pre>
+
+<ul>
+<li><strong>Defensive programming</strong></li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-5" style="background:;">
+  <hgroup>
+    <h2><code>traceback()</code></h2>
+  </hgroup>
+  <article data-timings="">
+    <p><code>traceback()</code> lists the sequence of calls that lead to the error.</p>
+
+<pre><code class="r"># exceptions-example.R
+f &lt;- function(a) g(a)
+g &lt;- function(b) h(b)
+h &lt;- function(c) i(c)
+i &lt;- function(d) &quot;a&quot; + d
+</code></pre>
+
+<pre><code class="r">source(&quot;exceptions-example.R&quot;)
+f(10)
+# Error in &quot;a&quot; + d : non-numeric argument to binary operator
+traceback()
+# 4: i(c) at exceptions-example.R#3
+# 3: h(b) at exceptions-example.R#2
+# 2: g(a) at exceptions-example.R#1
+# 1: f(10)
+</code></pre>
+
+<p>Remember to read the call stack from bottom to top!</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-6" style="background:;">
+  <hgroup>
+    <h2><code>browser()</code></h2>
+  </hgroup>
+  <article data-timings="">
+    <p><code>browser()</code> steps through the execution of an R function. </p>
+
+<pre><code class="r">browser()
+Browse[1]&gt;
+Browse[1]&gt; ls()
+## [1] &quot;f&quot; &quot;g&quot; &quot;h&quot; &quot;i&quot;
+Browse[1]&gt; print(f)
+## function(a) g(a)
+</code></pre>
+
+<ul>
+<li>Setting up a breakpoint in Rstudio is equivalent to inserting an <code>browser()</code>.</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-7" style="background:;">
+  <hgroup>
+    <h2><code>browser()</code> continued</h2>
+  </hgroup>
+  <article data-timings="">
+    <p><img src="./fig/Rstudio-debug-toolbar.png" alt="width"></p>
+
+<pre><code class="r">browser()
+Browse[1]&gt; n # s, f, c, Q
+</code></pre>
+
+<p>Special commands in <code>browser()</code> mode: </p>
+
+<ul>
+<li>Next, <code>n</code>: executes the next line of code.</li>
+<li>Step into, or <code>s</code>: step into that function if next line is a function.</li>
+<li>Finish, or <code>f</code>: finishes execution of the current loop.</li>
+<li>Continue, <code>c</code>: leaves interactive debugging and continues regular execution of the function.</li>
+<li>Stop, <code>Q</code>: stops debugging</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-8" style="background:;">
+  <hgroup>
+    <h2>Use <code>browser()</code> in clever ways</h2>
+  </hgroup>
+  <article data-timings="">
+    <ul>
+<li>Set up global option: call <code>browser()</code> whenever an error occurs:</li>
+</ul>
+
+<pre><code class="r">options(error = browser)
+options(error = NULL)
+</code></pre>
+
+<ul>
+<li>Combine with <code>if</code> to set up conditional breakpoints:</li>
+</ul>
+
+<pre><code class="r">if(i = 3) browser()
+</code></pre>
+
+<ul>
+<li>You can nest multiple <code>browser()</code>!</li>
+</ul>
+
+<pre><code class="r">browser()
+Browse[1]&gt; browser()
+Browse[2]&gt; browser()
+Browse[3]&gt; 
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-9" style="background:;">
+  <hgroup>
+    <h2>recover()</h2>
+  </hgroup>
+  <article data-timings="">
+    <p><code>recover()</code> allows to select from call stacks and call <code>browser()</code></p>
+
+<pre><code class="r">myFit &lt;- lm(y ~ x, data = xy, weights = w)
+## Error in lm.wfit(x, y, w, offset = offset, ...) :
+##        missing or negative weights not allowed
+recover()
+## Enter a frame number, or 0 to exit
+##    1:lm(y ~ x, data = xy, weights = w)
+##    2:lm.wfit(x, y, w, offset = offset, ...)
+Selection: 2
+## Called from: eval(expr, envir, enclos)
+Browse[1]&gt; ls()
+## [1] &quot;method&quot; &quot;n&quot;      &quot;ny&quot;     &quot;offset&quot; &quot;tol&quot;    &quot;w&quot;
+## [7] &quot;x&quot;      &quot;y&quot;
+Browse[1]&gt; w
+## [1] -0.5013844  1.3112515  0.2939348 -0.8983705 -0.1538642
+## [6] -0.9772989  0.7888790 -0.1919154 -0.3026882
+Browse[1]&gt; c # continue
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-10" style="background:;">
+  <hgroup>
+    <h2>Interactive debugging of batch R code</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Use <code>dump.frames()</code> and <code>debugger()</code>:</p>
+
+<pre><code class="r"># In batch R process ----
+dump_and_quit &lt;- function() {
+  # Save debugging info to file last.dump.rda
+  dump.frames(to.file = TRUE)
+  # Quit R with error status
+  q(status = 1)
+}
+options(error = dump_and_quit)
+
+# In a later interactive session ----
+load(&quot;last.dump.rda&quot;)
+debugger()
+</code></pre>
+
+<p><code>debugger()</code> enters an interactive debugger with the same interface as <code>recover()</code>.</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-11" style="background:;">
+  <hgroup>
+    <h2>Condition Handling</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Condition handlers: handling expected errors automatically.</p>
+
+<ul>
+<li><p>Expected errors</p>
+
+<ul>
+<li>example: when you&#39;re fitting many models to different datasets, such as bootstrap replicates. Sometimes the model might fail to fit and throw an error, but you don&#39;t want to stop everything. </li>
+</ul></li>
+<li><p>Common conditions: errors, warnings, and messages. </p></li>
+<li><p>Common condition handlers (i.e., R functions): </p></li>
+</ul>
+
+<pre><code class="r">stop(&quot;errors!&quot;); warning(&quot;warnings!&quot;); message(&quot;messages!&quot;)
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-12" style="background:;">
+  <hgroup>
+    <h2><code>try()</code></h2>
+  </hgroup>
+  <article data-timings="">
+    <p><code>try()</code> allows execution to continue even after an error has occurred: </p>
+
+<pre><code class="r">elements &lt;- list(letters[1:5], 1:5)
+print( lapply(elements, log) )
+## Error in FUN(X[[1L]], ...) : 
+##   non-numeric argument to mathematical function
+print( lapply(elements, function(x) try(log(x))) )
+## [[1]]
+## [1] &quot;Error in log(x) : non-numeric argument to mathematical function\n&quot;
+## attr(,&quot;class&quot;)
+## [1] &quot;try-error&quot;
+## attr(,&quot;condition&quot;)
+## &lt;simpleError in log(x): non-numeric argument to mathematical function&gt;
+## 
+## [[2]]
+## [1] 0.0000000 0.6931472 1.0986123 1.3862944 1.6094379
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-13" style="background:;">
+  <hgroup>
+    <h2>tryCatch()</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>THe function <code>tryCatch()</code> allows you to use user-defined handlers (i.e. functions) when different conditions occur.</p>
+
+<pre><code class="r">tryCatch(mycode,
+  error = function(c) { &quot;your action when error occurs&quot; },
+  warning = function(c) { &quot;your action when warning occurs&quot; },
+  message = function(c) { &quot;your action when message occurs&quot; }
+)
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-14" style="background:;">
+  <hgroup>
+    <h2>Defensive programming</h2>
+  </hgroup>
+  <article data-timings="">
+    <p><q> Fail fast: as soon as something wrong is discovered, signal an error. (Hadley Wickham) </q> </p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-15" style="background:;">
+  <hgroup>
+    <h2>Defensive programming</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>For example, a good practice is to check function inputs: </p>
+
+<ul>
+<li><code>stopifnot()</code>, </li>
+<li>the <code>assertthat</code> package, </li>
+<li>or simple <code>if</code> statements and <code>stop()</code>.</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-16" style="background:;">
+  <hgroup>
+    <h2>Reference</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>[1] The content of these slides is from <a href="http://adv-r.had.co.nz/">Advanced R</a> by Hadley Wickham</p>
+
+<p>[2] R help</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="segue dark" id="slide-17" style="background:;">
+  <hgroup>
+    <h2>Thank you!</h2>
+  </hgroup>
+  <article data-timings="">
+    
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+    <slide class="backdrop"></slide>
+  </slides>
+  <div class="pagination pagination-small" id='io2012-ptoc' style="display:none;">
+    <ul>
+      <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=1 title='Let&#39;s debug!'>
+         1
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=2 title='What is the most handy tool for debugging in nearly all programming languages?'>
+         2
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=3 title='<code>print()</code>'>
+         3
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=4 title='Content'>
+         4
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=5 title='<code>traceback()</code>'>
+         5
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=6 title='<code>browser()</code>'>
+         6
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=7 title='<code>browser()</code> continued'>
+         7
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=8 title='Use <code>browser()</code> in clever ways'>
+         8
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=9 title='recover()'>
+         9
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=10 title='Interactive debugging of batch R code'>
+         10
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=11 title='Condition Handling'>
+         11
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=12 title='<code>try()</code>'>
+         12
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=13 title='tryCatch()'>
+         13
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=14 title='Defensive programming'>
+         14
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=15 title='Defensive programming'>
+         15
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=16 title='Reference'>
+         16
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=17 title='Thank you!'>
+         17
+      </a>
+    </li>
+  </ul>
+  </div>  <!--[if IE]>
+    <script 
+      src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js">  
+    </script>
+    <script>CFInstall.check({mode: 'overlay'});</script>
+  <![endif]-->
+</body>
+  <!-- Load Javascripts for Widgets -->
+  
+  <!-- MathJax: Fall back to local if CDN offline but local image fonts are not supported (saves >100MB) -->
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        processEscapes: true
+      }
+    });
+  </script>
+  <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <!-- <script src="https://c328740.ssl.cf1.rackcdn.com/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script> -->
+  <script>window.MathJax || document.write('<script type="text/x-mathjax-config">MathJax.Hub.Config({"HTML-CSS":{imageFont:null}});<\/script><script src="libraries/widgets/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"><\/script>')
+</script>
+<!-- LOAD HIGHLIGHTER JS FILES -->
+  <script src="libraries/highlighters/highlight.js/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <!-- DONE LOADING HIGHLIGHTER JS FILES -->
+   
+  </html>
