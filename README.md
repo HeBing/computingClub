@@ -7,7 +7,7 @@ Debugging in R slides for Computing Club
 
 This set of [slides](http://hebing.github.io/computingClub/index.html) was created based on [Chapter Exceptions and debugging](http://adv-r.had.co.nz/Exceptions-Debugging.html) from [Advanced R](http://adv-r.had.co.nz/) (by Hadley Wickham).
 
-This set of (slides)[http://hebing.github.io/computingClub/index.html] was presented in Computing Club 09-18-2014.
+This set of [slides](http://hebing.github.io/computingClub/index.html) was presented in Computing Club 09-18-2014.
 
 #### Some notes on the creation process
 
